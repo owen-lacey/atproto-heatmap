@@ -1,7 +1,7 @@
 import { Agent } from '@atproto/api';
 import { IdResolver, getPds } from '@atproto/identity';
 
-async function getPdsAgent(handle: string): Promise<Agent> {
+export async function getPdsAgent(handle: string): Promise<{ agent: Agent; did: string }> {
   const resolver = new IdResolver();
   const did = (await resolver.handle.resolve(handle));
   if (!did) {
@@ -18,7 +18,7 @@ async function getPdsAgent(handle: string): Promise<Agent> {
   }
   
   const agent = new Agent(pds);
-  return agent;
+  return { agent, did };
 }
 
 // Get a profile by handle
@@ -37,7 +37,7 @@ export async function getProfile(handle: string): Promise<{
     throw new Error(`Unable to resolve DID for handle: ${cleanHandle}`);
   }
   
-  const agent = await getPdsAgent(cleanHandle);
+  const { agent } = await getPdsAgent(cleanHandle);
   
   // Get the profile record directly from the repo
   const response = await agent.com.atproto.repo.getRecord({

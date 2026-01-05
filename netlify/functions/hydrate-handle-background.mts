@@ -1,67 +1,13 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { Agent } from '@atproto/api';
-import { IdResolver, getPds } from '@atproto/identity';
 import { COLLECTIONS } from '../../lib/collections';
-
-// Configuration
-export const config = {
-  type: 'background' as const,
-};
+import { getPdsAgent } from '@/lib/atproto';
+import { Database, createServerClient } from '@/lib/supabase';
+import type { Context } from '@netlify/functions';
 
 // One year lookback limit
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 const BATCH_SIZE = 1000;
-
-interface Database {
-  public: {
-    Tables: {
-      handles: {
-        Row: {
-          id: string;
-          handle: string;
-          status: 'pending' | 'hydrating' | 'complete' | 'error';
-          at_proto_data: any;
-          error_message: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-      };
-      records: {
-        Insert: {
-          handle_id: string;
-          collection: string;
-          timestamp: string;
-        };
-      };
-    };
-  };
-}
-
-/**
- * Resolve handle to DID and get PDS agent
- */
-async function getAgentForHandle(handle: string): Promise<{ agent: Agent; did: string }> {
-  const resolver = new IdResolver();
-  const did = await resolver.handle.resolve(handle);
-  
-  if (!did) {
-    throw new Error(`Unable to resolve DID for handle: ${handle}`);
-  }
-
-  const didDoc = await resolver.did.resolve(did);
-  if (!didDoc) {
-    throw new Error(`Unable to resolve DID document for DID: ${did}`);
-  }
-
-  const pds = getPds(didDoc);
-  if (!pds) {
-    throw new Error(`No PDS found in DID document for DID: ${did}`);
-  }
-
-  const agent = new Agent(pds);
-  return { agent, did };
-}
-
 /**
  * Fetch records from AT Proto with pagination
  */
@@ -132,7 +78,7 @@ async function fetchRecordsForCollection(
  * Insert records in batches
  */
 async function insertRecordsInBatches(
-  supabase: ReturnType<typeof createClient<Database>>,
+  supabase: SupabaseClient<Database>,
   handleId: string,
   records: Array<{ collection: string; timestamp: string }>
 ) {
@@ -165,9 +111,9 @@ async function insertRecordsInBatches(
 }
 
 /**
- * Main handler function
+ * Background function - runs up to 15 minutes, returns 202 immediately
  */
-export default async function handler(req: Request) {
+export default async function (req: Request, context: Context) {
   const startTime = Date.now();
   console.log('Hydration function started');
 
@@ -186,19 +132,7 @@ export default async function handler(req: Request) {
     console.log(`Processing record ID: ${recordId}`);
 
     // Create Supabase client
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Missing Supabase environment variables');
-    }
-
-    const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    });
+    const supabase = createServerClient();
 
     // Fetch handle record
     const { data: handleRecord, error: fetchError } = await supabase
@@ -221,10 +155,12 @@ export default async function handler(req: Request) {
       .eq('id', recordId);
 
     // Get agent for handle
-    const { agent, did } = await getAgentForHandle(handleRecord.handle);
+    const { agent, did } = await getPdsAgent(handleRecord.handle);
 
-    // Calculate cutoff date (1 year ago)
-    const cutoffDate = new Date(Date.now() - ONE_YEAR_MS);
+    // Calculate cutoff date (1 year ago from start of today)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const cutoffDate = new Date(today.getTime() - ONE_YEAR_MS);
     console.log(`Cutoff date: ${cutoffDate.toISOString()}`);
 
     // Fetch records from all collections
@@ -282,11 +218,8 @@ export default async function handler(req: Request) {
       const { recordId } = body;
 
       if (recordId) {
-        const supabaseUrl = process.env.SUPABASE_URL;
-        const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
-
-        if (supabaseUrl && supabaseServiceKey) {
-          const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey);
+        try {
+          const supabase = createServerClient();
           await supabase
             .from('handles')
             .update({
@@ -294,6 +227,8 @@ export default async function handler(req: Request) {
               error_message: error instanceof Error ? error.message : 'Unknown error',
             })
             .eq('id', recordId);
+        } catch (updateError) {
+          console.error('Failed to update error status:', updateError);
         }
       }
     } catch (updateError) {

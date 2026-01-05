@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Database types for type-safe queries
@@ -34,6 +34,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       records: {
         Row: {
@@ -54,8 +55,11 @@ export interface Database {
           collection?: string;
           timestamp?: string;
         };
+        Relationships: [];
       };
     };
+    Views: {};
+    Functions: {};
   };
 }
 
@@ -63,7 +67,7 @@ export interface Database {
  * Create a Supabase client for server-side operations
  * Uses service role key to bypass RLS
  */
-export function createServerClient() {
+export function createServerClient(): SupabaseClient<Database> {
   const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 

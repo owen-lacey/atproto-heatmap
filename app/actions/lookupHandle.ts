@@ -86,7 +86,7 @@ export async function lookupHandle(handle: string): Promise<LookupResult> {
     // Trigger background function
     try {
       const netlifyUrl = process.env.NETLIFY_URL || 'http://localhost:8888';
-      const functionUrl = `${netlifyUrl}/.netlify/functions/hydrate-handle`;
+      const functionUrl = `${netlifyUrl}/.netlify/functions/hydrate-handle-background`;
 
       // Fire and forget - background function handles the rest
       fetch(functionUrl, {
