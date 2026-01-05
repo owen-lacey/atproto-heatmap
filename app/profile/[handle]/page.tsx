@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase";
-import { HydrationProgress } from "@/components/HydrationProgress";
+import { ProfileClient } from "./ProfileClient";
 
 interface ProfilePageProps {
   params: Promise<{ handle: string }>;
@@ -91,51 +91,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           <span className="text-foreground">@{profile.handle}</span>
         </nav>
 
-        {/* Profile Header */}
-        <div className="bg-card rounded-lg border border-border p-6">
-          <div className="flex flex-col sm:flex-row gap-6 items-start">
-            {/* Avatar */}
-            <div className="shrink-0">
-              {profile.avatar ? (
-                <img
-                  src={profile.avatar}
-                  alt={`${profile.displayName || profile.handle} avatar`}
-                  className="w-24 h-24 rounded-full border-2 border-border"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-muted border-2 border-border flex items-center justify-center text-2xl font-bold text-muted-foreground">
-                  {(profile.displayName || profile.handle).charAt(0).toUpperCase()}
-                </div>
-              )}
-            </div>
-
-            {/* Profile Info */}
-            <div className="flex-1 space-y-2">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">
-                  {profile.displayName || profile.handle}
-                </h1>
-                <p className="text-muted-foreground">@{profile.handle}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Hydration Progress */}
-        <HydrationProgress handle={decodedHandle} />
-
-        {/* Heatmap Placeholder */}
-        <div className="bg-card rounded-lg border border-border p-8">
-          <div className="text-center space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">Activity Heatmap</h2>
-            <p className="text-muted-foreground">
-              Heatmap visualization will be implemented here to show {profile.displayName || profile.handle}'s AT Protocol activity over time.
-            </p>
-            <div className="w-full h-32 bg-muted rounded-lg flex items-center justify-center">
-              <span className="text-muted-foreground">📊 Heatmap coming soon</span>
-            </div>
-          </div>
-        </div>
+        {/* Profile Header and Content */}
+        <ProfileClient handle={decodedHandle} profile={profile} />
       </div>
     </div>
   );

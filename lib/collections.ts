@@ -20,15 +20,33 @@ export interface CollectionConfig {
 export const COLLECTIONS: CollectionConfig[] = [
   {
     collection: 'app.bsky.feed.post',
-    displayName: 'BlueSky',
+    displayName: 'Bluesky',
     timestampProperty: 'createdAt',
     color: '#1DA1F2'
   },
   {
-    collection: 'leaflet.pub.document',
+    collection: 'pub.leaflet.document',
     displayName: 'Leaflet',
     timestampProperty: 'publishedAt',
     color: '#10B981'
+  },
+  {
+    collection: 'com.whtwnd.blog.entry',
+    displayName: 'WhiteWind',
+    timestampProperty: 'createdAt',
+    color: '#F3F4F6'
+  },
+  {
+    collection: 'events.smokesignal.calendar.event',
+    displayName: 'Smoke Signal',
+    timestampProperty: 'createdAt',
+    color: '#0AD0B2'
+  },
+  {
+    collection: 'fyi.unravel.frontpage.post',
+    displayName: 'Frontpage',
+    timestampProperty: 'createdAt',
+    color: '#7C85FF'
   }
 ];
 

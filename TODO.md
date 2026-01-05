@@ -1,0 +1,9 @@
+- mermaid diagram describing the flow
+- not found page should imply that you need to go back to the home page - maybe a redirect with query param prepopulating the input?
+- regenerate button in case new apps are added
+- deltas i.e automatically get the latest data including the latests day (check for duplication)
+- flicker on re-loading the screen
+- privacy stuff
+- auth / check for opt out of bsky
+- OG image
+- proper logo favicon

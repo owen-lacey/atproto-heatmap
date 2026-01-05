@@ -89,7 +89,7 @@ export function createServerClient(): SupabaseClient<Database> {
  * Create a Supabase client for client-side operations
  * Uses anon key with RLS enabled
  */
-export function createBrowserClient() {
+export function createBrowserClient(): SupabaseClient<Database> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
