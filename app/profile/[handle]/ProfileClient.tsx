@@ -1,9 +1,7 @@
 'use client';
 
 import { useHandleStatus } from '@/lib/hooks/useHandleStatus';
-import { useRecordCounts } from '@/lib/hooks/useRecordCounts';
 import { useHeatmapData } from '@/lib/hooks/useHeatmapData';
-import { HydrationProgress } from '@/components/HydrationProgress';
 import { Heatmap } from '@/components/Heatmap';
 import { ProfileHeader } from '@/components/ProfileHeader';
 import { ProfileCardLoading } from './loading';
