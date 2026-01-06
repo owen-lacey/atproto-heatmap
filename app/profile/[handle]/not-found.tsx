@@ -1,7 +1,20 @@
-import Link from "next/link";
+"use client";
+
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
 export default function ProfileNotFound() {
+  const params = useParams();
+  const router = useRouter();
+  const handle = params.handle as string;
+
+  useEffect(() => {
+    router.push(`/?handle=${encodeURIComponent(handle)}`);
+
+    return () => {};
+  }, [handle, router]);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8 text-center">
       <div className="space-y-6 max-w-lg">
@@ -36,30 +49,29 @@ export default function ProfileNotFound() {
               <li>Try searching on <a href="https://bsky.app" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">bsky.app</a> first</li>
             </ul>
           </div>
+          <p className="text-sm text-muted-foreground mt-4">
+            Redirecting to home page in 2 seconds...
+          </p>
         </div>
         <div className="flex gap-3 justify-center">
-          <Button asChild variant="outline">
-            <Link href="/">
-              <svg
-                className="w-4 h-4 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-                />
-              </svg>
-              Back to Home
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href="/profile/jay.bsky.team">
-              Try an Example
-            </Link>
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/?handle=${encodeURIComponent(handle)}`)}
+          >
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+              />
+            </svg>
+            Back to Home Now
           </Button>
         </div>
       </div>

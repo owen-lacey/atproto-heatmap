@@ -13,6 +13,7 @@ interface GridCell {
   dateKey: string;
   count: number;
   dayData: DayData | null;
+  isNullCell?: boolean;
 }
 
 export function Heatmap({ data }: HeatmapProps) {
@@ -26,8 +27,8 @@ export function Heatmap({ data }: HeatmapProps) {
     // Yesterday is the last day we should show
     const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
 
-    // Calculate the date 365 days ago
-    const startDate = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000);
+    // Calculate the start date (364 days ago, so we don't show dates a year ago or more)
+    const startDate = new Date(today.getTime() - 364 * 24 * 60 * 60 * 1000);
 
     // Find the first Sunday on or before startDate
     const dayOfWeek = startDate.getDay();
@@ -45,20 +46,20 @@ export function Heatmap({ data }: HeatmapProps) {
         const cellDate = new Date(firstSunday);
         cellDate.setDate(firstSunday.getDate() + week * 7 + day);
 
-        // Skip dates after yesterday
-        if (cellDate > yesterday) {
-          continue;
-        }
-
         const dateKey = cellDate.toISOString().split('T')[0];
-        const dayData = data.get(dateKey) || null;
-        const count = dayData?.total || 0;
+        
+        // Mark cells as null if they're after yesterday or before startDate
+        const isNullCell = cellDate > yesterday || cellDate < startDate;
+        
+        const dayData = isNullCell ? null : (data.get(dateKey) || null);
+        const count = isNullCell ? 0 : (dayData?.total || 0);
 
         weekColumn.push({
           date: cellDate,
           dateKey,
           count,
-          dayData,
+          dayData: isNullCell ? null : dayData,
+          isNullCell,
         });
       }
 
@@ -175,7 +176,16 @@ export function Heatmap({ data }: HeatmapProps) {
                 <div key={weekIndex} className="flex flex-col gap-1">
                   {week.map((cell, dayIndex) => {
                     const opacity = getOpacity(cell.count);
-                    const isToday = cell.dateKey === new Date().toISOString().split('T')[0];
+
+                    // Render null cells as invisible placeholders
+                    if (cell.isNullCell) {
+                      return (
+                        <div
+                          key={`${weekIndex}-${dayIndex}`}
+                          className="w-[11px] h-[11px]"
+                        />
+                      );
+                    }
 
                     return (
                       <div
@@ -192,11 +202,9 @@ export function Heatmap({ data }: HeatmapProps) {
                         onMouseLeave={() => setHoveredCell(null)}
                       >
                         <div
-                          className={`w-[11px] h-[11px] rounded-[2px] cursor-pointer transition-all ${
-                            isToday ? 'ring-2 ring-blue-500 ring-offset-1' : ''
-                          }`}
+                          className={`w-[11px] h-[11px] rounded-[2px] cursor-pointer transition-all`}
                           style={{
-                            backgroundColor: opacity > 0 ? `rgba(16, 185, 129, ${opacity})` : '#1f2937',
+                            backgroundColor: opacity > 0 ? `rgba(16, 185, 129, ${opacity})` : '#0D1118',
                           }}
                         />
                       </div>

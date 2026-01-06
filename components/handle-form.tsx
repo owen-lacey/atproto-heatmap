@@ -1,16 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { lookupHandle } from '@/app/actions/lookupHandle';
 
-export function HandleForm() {
+export function HandleForm({
+  searchParams,
+}: {
+  searchParams?: Promise<{ handle?: string }>;
+}) {
   const [handle, setHandle] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+
+  // Prepopulate from query param
+  useEffect(() => {
+    if (searchParams) {
+      searchParams.then((params) => {
+        if (params.handle) {
+          setHandle(decodeURIComponent(params.handle));
+        }
+      });
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
