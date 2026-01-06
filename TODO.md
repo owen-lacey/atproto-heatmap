@@ -5,5 +5,5 @@
 - flicker on re-loading the screen
 - privacy stuff
 - auth / check for opt out of bsky
-- OG image
+- ~~OG image~~ (done - SSR heatmap with logo, avatar, breakdown)
 - proper logo favicon
