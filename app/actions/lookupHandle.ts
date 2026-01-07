@@ -48,12 +48,41 @@ export async function lookupHandle(handle: string): Promise<LookupResult> {
     // Check if handle already exists
     const { data: existingHandle } = await supabase
       .from('handles')
-      .select('id, status')
+      .select('id, status, updated_at')
       .eq('handle', cleanHandle)
       .single();
 
-    // If exists and complete, return existing record
+    // If exists and complete, check if data is stale
     if (existingHandle && existingHandle.status === 'complete') {
+      // Check if updated_at is older than today
+      const updatedAt = new Date(existingHandle.updated_at);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (updatedAt < today) {
+        console.log(`Data is stale for ${cleanHandle}, triggering delta update`);
+        // Trigger delta update
+        try {
+          const netlifyUrl = process.env.NETLIFY_URL || 'http://localhost:8888';
+          const functionUrl = `${netlifyUrl}/.netlify/functions/hydrate-handle-background`;
+
+          fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              recordId: existingHandle.id,
+              deltaMode: true,
+            }),
+          }).catch((error) => {
+            console.error('Failed to trigger delta update:', error);
+          });
+        } catch (error) {
+          console.error('Failed to trigger delta update:', error);
+        }
+      }
+
       return {
         success: true,
         recordId: existingHandle.id,

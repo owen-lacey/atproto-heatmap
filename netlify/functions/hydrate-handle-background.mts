@@ -16,13 +16,17 @@ async function fetchRecordsForCollection(
   did: string,
   collection: string,
   timestampProperty: string,
-  cutoffDate: Date
+  cutoffDate: Date,
+  startDate?: Date
 ): Promise<Array<{ collection: string; timestamp: string }>> {
   const records: Array<{ collection: string; timestamp: string }> = [];
   let cursor: string | undefined;
   let shouldContinue = true;
 
   console.log(`Fetching ${collection} for ${did}...`);
+  if (startDate) {
+    console.log(`  Delta mode: fetching from ${startDate.toISOString()} onwards`);
+  }
 
   while (shouldContinue) {
     try {
@@ -50,6 +54,11 @@ async function fetchRecordsForCollection(
           break;
         }
 
+        // For delta updates, only include records newer than startDate
+        if (startDate && recordDate < startDate) {
+          continue;
+        }
+
         records.push({
           collection,
           timestamp,
@@ -75,7 +84,7 @@ async function fetchRecordsForCollection(
 }
 
 /**
- * Insert records in batches
+ * Insert records in batches with deduplication
  */
 async function insertRecordsInBatches(
   supabase: SupabaseClient<Database>,
@@ -89,6 +98,9 @@ async function insertRecordsInBatches(
 
   console.log(`Inserting ${records.length} records in ${batches.length} batches...`);
 
+  let insertedCount = 0;
+  let duplicateCount = 0;
+
   for (let i = 0; i < batches.length; i++) {
     const batch = batches[i];
     const recordsToInsert = batch.map((r) => ({
@@ -97,17 +109,54 @@ async function insertRecordsInBatches(
       timestamp: r.timestamp,
     }));
 
-    const { error } = await supabase.from('records').insert(recordsToInsert);
+    // Create unique composite keys for deduplication
+    const uniqueKeys = new Set<string>();
+    const deduplicatedRecords = recordsToInsert.filter((r) => {
+      const key = `${r.handle_id}:${r.collection}:${r.timestamp}`;
+      if (uniqueKeys.has(key)) {
+        duplicateCount++;
+        return false;
+      }
+      uniqueKeys.add(key);
+      return true;
+    });
 
-    if (error) {
-      console.error(`Error inserting batch ${i + 1}:`, error);
-      throw error;
+    if (deduplicatedRecords.length === 0) {
+      console.log(`  Batch ${i + 1}/${batches.length}: All duplicates, skipping`);
+      continue;
     }
 
-    console.log(`  Inserted batch ${i + 1}/${batches.length}`);
+    const { error, count } = await supabase
+      .from('records')
+      .insert(deduplicatedRecords)
+      .select('id', { count: 'exact', head: true });
+
+    if (error) {
+      // Check if error is due to unique constraint violation
+      if (error.code === '23505') {
+        console.log(`  Batch ${i + 1}/${batches.length}: Contains duplicates, attempting individual inserts`);
+        // Try inserting records one by one to skip duplicates
+        for (const record of deduplicatedRecords) {
+          const { error: singleError } = await supabase.from('records').insert(record);
+          if (singleError && singleError.code !== '23505') {
+            console.error(`Error inserting record:`, singleError);
+          } else if (!singleError) {
+            insertedCount++;
+          } else {
+            duplicateCount++;
+          }
+        }
+      } else {
+        console.error(`Error inserting batch ${i + 1}:`, error);
+        throw error;
+      }
+    } else {
+      insertedCount += count || deduplicatedRecords.length;
+      console.log(`  Inserted batch ${i + 1}/${batches.length}`);
+    }
   }
 
-  console.log('All records inserted successfully');
+  console.log(`Records inserted: ${insertedCount}, Duplicates skipped: ${duplicateCount}`);
 }
 
 /**
@@ -120,7 +169,7 @@ export default async function (req: Request, context: Context) {
   try {
     // Parse request body
     const body = await req.json();
-    const { recordId } = body;
+    const { recordId, deltaMode } = body;
 
     if (!recordId) {
       return new Response(JSON.stringify({ error: 'Missing recordId' }), {
@@ -129,7 +178,7 @@ export default async function (req: Request, context: Context) {
       });
     }
 
-    console.log(`Processing record ID: ${recordId}`);
+    console.log(`Processing record ID: ${recordId}${deltaMode ? ' (delta mode)' : ''}`);
 
     // Create Supabase client
     const supabase = createServerClient();
@@ -147,6 +196,13 @@ export default async function (req: Request, context: Context) {
     }
 
     console.log(`Processing handle: ${handleRecord.handle}`);
+
+    // Determine start date for delta updates
+    let startDate: Date | undefined;
+    if (deltaMode && handleRecord.updated_at) {
+      startDate = new Date(handleRecord.updated_at);
+      console.log(`Delta mode: fetching records since ${startDate.toISOString()}`);
+    }
 
     // Update status to hydrating
     await supabase
@@ -173,7 +229,8 @@ export default async function (req: Request, context: Context) {
           did,
           collectionConfig.collection,
           collectionConfig.timestampProperty,
-          cutoffDate
+          cutoffDate,
+          startDate
         );
         allRecords.push(...records);
       } catch (error) {
@@ -189,7 +246,7 @@ export default async function (req: Request, context: Context) {
       await insertRecordsInBatches(supabase, recordId, allRecords);
     }
 
-    // Mark as complete
+    // Mark as complete and update timestamp
     await supabase
       .from('handles')
       .update({ status: 'complete' })
@@ -202,6 +259,7 @@ export default async function (req: Request, context: Context) {
       JSON.stringify({
         success: true,
         recordCount: allRecords.length,
+        mode: deltaMode ? 'delta' : 'full',
         duration: `${duration}s`,
       }),
       {
