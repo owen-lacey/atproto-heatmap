@@ -126,10 +126,10 @@ async function insertRecordsInBatches(
       continue;
     }
 
-    const { error, count } = await supabase
+    const { error } = await supabase
       .from('records')
       .insert(deduplicatedRecords)
-      .select('id', { count: 'exact', head: true });
+      .select();
 
     if (error) {
       // Check if error is due to unique constraint violation
@@ -151,7 +151,7 @@ async function insertRecordsInBatches(
         throw error;
       }
     } else {
-      insertedCount += count || deduplicatedRecords.length;
+      insertedCount += deduplicatedRecords.length;
       console.log(`  Inserted batch ${i + 1}/${batches.length}`);
     }
   }
