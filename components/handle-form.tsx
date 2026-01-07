@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { lookupHandle } from '@/app/actions/lookupHandle';
+import { ActorTypeahead } from '@/components/ActorTypeahead';
+import { ActorResult } from '@/app/actions/searchActors';
 
 export function HandleForm({
   searchParams,
@@ -27,13 +28,12 @@ export function HandleForm({
     }
   }, [searchParams]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const navigateToProfile = async (handleToLookup: string) => {
     setError(null);
     setIsSubmitting(true);
 
     try {
-      const result = await lookupHandle(handle);
+      const result = await lookupHandle(handleToLookup);
 
       if (!result.success) {
         setError(result.error || 'Failed to lookup handle');
@@ -41,7 +41,7 @@ export function HandleForm({
       }
 
       // Redirect to profile page to show real-time progress
-      const cleanHandle = handle.trim().replace(/^@/, '');
+      const cleanHandle = handleToLookup.trim().replace(/^@/, '');
       router.push(`/profile/${encodeURIComponent(cleanHandle)}`);
     } catch (err) {
       console.error('Error submitting handle:', err);
@@ -51,14 +51,25 @@ export function HandleForm({
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await navigateToProfile(handle);
+  };
+
+  const handleActorSelect = (actor: ActorResult) => {
+    setHandle(actor.handle);
+    // Navigate immediately after selection
+    navigateToProfile(actor.handle);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex gap-3 w-full max-w-md">
       <div className="flex-1 space-y-2">
-        <Input
-          type="text"
-          placeholder="handle.bsky.social"
+        <ActorTypeahead
           value={handle}
-          onChange={(e) => setHandle(e.target.value)}
+          onChange={setHandle}
+          onSelect={handleActorSelect}
+          placeholder="handle.bsky.social"
           className="h-12 text-base bg-card border-border/50 focus:border-primary/50 placeholder:text-muted-foreground/50"
           disabled={isSubmitting}
         />
