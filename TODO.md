@@ -1,12 +1,12 @@
 ## Tasks
 
-### 1. [ ] Mermaid diagram describing the flow
+### 1. [x] Mermaid diagram describing the flow
 **Difficulty:** Easy  
 **Spec:** Create a docs/architecture.md file with a Mermaid diagram showing the user flow from "Browse" button click → handle lookup → background function trigger → Supabase data storage → profile page render.
 
 ---
 
-### 2. [ ] Not found page redirect to home
+### 2. [x] Not found page redirect to home
 **Difficulty:** Easy  
 **Spec:** Modify `app/profile/[handle]/not-found.tsx` to redirect to "/" with the invalid handle as a query param (`?handle=xyz`) to prepopulate the input field.
 
@@ -30,7 +30,7 @@
 
 ---
 
-### 6. [ ] Privacy disclosure
+### 6. [x] Privacy disclosure
 **Difficulty:** Easy  
 **Privacy considerations:**
 - **GDPR/CCPA:** Users have right to know what data is stored and request deletion
@@ -54,7 +54,7 @@
 
 ---
 
-### 8. [ ] OG image enhancement
+### 8. [x] OG image enhancement
 **Difficulty:** Easy-Medium  
 **Spec:** Enhance `app/api/og/route.tsx` to generate dynamic OG images. Use @vercel/og with:
 - User's avatar (top)
@@ -65,7 +65,7 @@ Size: 1200x630px. Cache images by handle.
 
 ---
 
-### 9. [ ] Logo/favicon (blocked)
+### 9. [x] Logo/favicon
 **Difficulty:** Easy  
 **Spec:** Once logo SVG is ready:
 1. Add to `public/logo.svg`
