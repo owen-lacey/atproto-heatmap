@@ -25,7 +25,7 @@ export function useHandleStatus(handle: string): UseHandleStatusReturn {
       const { data, error } = await supabase
         .from('handles')
         .select('id, status, error_message')
-        .eq('handle', handle)
+        .eq('handle', handle.toLowerCase())
         .single();
 
       if (error) {

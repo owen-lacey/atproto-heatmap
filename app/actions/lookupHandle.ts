@@ -15,7 +15,7 @@ interface LookupResult {
 export async function lookupHandle(handle: string): Promise<LookupResult> {
   try {
     // Validate input
-    const cleanHandle = handle.trim().replace(/^@/, '');
+    const cleanHandle = handle.trim().replace(/^@/, '').toLowerCase();
     if (!cleanHandle) {
       return { success: false, error: 'Please enter a valid handle' };
     }
@@ -45,11 +45,11 @@ export async function lookupHandle(handle: string): Promise<LookupResult> {
     // Create Supabase client with service role
     const supabase = createServerClient();
 
-    // Check if handle already exists
+    // Check if handle already exists (case-insensitive)
     const { data: existingHandle } = await supabase
       .from('handles')
       .select('id, status, updated_at')
-      .eq('handle', cleanHandle)
+      .ilike('handle', cleanHandle)
       .single();
 
     // If exists and complete, check if data is stale
