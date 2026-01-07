@@ -12,8 +12,8 @@
 
 ---
 
-### 3. [ ] Reset/regenerate button
-**Difficulty:** Medium  
+### 3. [x] Reset/regenerate button
+**Difficulty:** Medium
 **Spec:** Add context menu to profile page (`[handle]/page.tsx`) with "Reset Data" option that deletes user's cached data from Supabase, then redirects to home page with handle prepopulated to trigger fresh hydration.
 
 ---

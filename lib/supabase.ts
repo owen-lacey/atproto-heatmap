@@ -59,7 +59,17 @@ export interface Database {
       };
     };
     Views: {};
-    Functions: {};
+    Functions: {
+      get_collection_totals: {
+        Args: {
+          p_handle_id: string;
+        };
+        Returns: Array<{
+          collection: string;
+          total: number;
+        }>;
+      };
+    };
   };
 }
 
