@@ -24,8 +24,18 @@ export async function lookupHandle(handle: string): Promise<LookupResult> {
     let profile;
     try {
       profile = await getProfile(cleanHandle);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch AT Proto profile:', error);
+
+      // Check if this is an opt-out error
+      if (error.message?.startsWith('OPT_OUT:')) {
+        const message = error.message.substring(8); // Remove "OPT_OUT:" prefix
+        return {
+          success: false,
+          error: message,
+        };
+      }
+
       return {
         success: false,
         error: 'Handle not found. Please check the handle and try again.',

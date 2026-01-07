@@ -51,6 +51,24 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
+            <h2 className="text-2xl font-semibold text-foreground">Opting Out of Public Indexing</h2>
+            <p className="text-muted-foreground">
+              ATProto Heatmap respects the AT Protocol's standard opt-out mechanism for public indexing. If you have applied the <code className="px-1.5 py-0.5 bg-muted rounded text-sm">!no-unauthenticated</code> label to your Bluesky profile, our service will not collect or display your data.
+            </p>
+            <p className="text-muted-foreground">
+              To opt out of public indexing services like ATProto Heatmap:
+            </p>
+            <ol className="list-decimal list-inside space-y-2 text-muted-foreground ml-4">
+              <li>Apply the <code className="px-1.5 py-0.5 bg-muted rounded text-sm">!no-unauthenticated</code> label to your Bluesky profile</li>
+              <li>This label indicates you do not want unauthenticated access to your data</li>
+              <li>Services that respect this label (including ATProto Heatmap) will not index your profile</li>
+            </ol>
+            <p className="text-muted-foreground mt-4">
+              If you have already been indexed and apply the label afterward, you can also use the "Reset Data" feature to remove your cached data from our system.
+            </p>
+          </section>
+
+          <section className="space-y-3">
             <h2 className="text-2xl font-semibold text-foreground">Data Retention</h2>
             <p className="text-muted-foreground">
               Your data is stored indefinitely to provide fast access to your heatmap. However, you have the right to request deletion of your data at any time.

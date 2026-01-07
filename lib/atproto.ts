@@ -30,22 +30,48 @@ export async function getProfile(handle: string): Promise<{
   avatar?: string;
 }> {
   const cleanHandle = handle.replace(/^@/, '');
-  
+
   const resolver = new IdResolver();
   const did = await resolver.handle.resolve(cleanHandle);
   if (!did) {
     throw new Error(`Unable to resolve DID for handle: ${cleanHandle}`);
   }
-  
+
   const { agent } = await getPdsAgent(cleanHandle);
-  
+
+  // Check for !no-unauthenticated label via app.bsky.actor.getProfile
+  // This uses the public Bluesky API to check if user has opted out
+  try {
+    const publicAgent = new Agent('https://public.api.bsky.app');
+    const profileResponse = await publicAgent.app.bsky.actor.getProfile({
+      actor: cleanHandle
+    });
+
+    // Check if profile has the !no-unauthenticated label
+    const labels = profileResponse.data.labels || [];
+    const hasNoUnauthLabel = labels.some(
+      (label: any) => label.val === '!no-unauthenticated'
+    );
+
+    if (hasNoUnauthLabel) {
+      throw new Error('OPT_OUT:This user has opted out of public indexing');
+    }
+  } catch (error: any) {
+    // If the error is our opt-out error, re-throw it
+    if (error.message?.startsWith('OPT_OUT:')) {
+      throw error;
+    }
+    // Otherwise, log but continue - we don't want API issues to block access
+    console.warn('Failed to check !no-unauthenticated label:', error);
+  }
+
   // Get the profile record directly from the repo
   const response = await agent.com.atproto.repo.getRecord({
     repo: did,
     collection: 'app.bsky.actor.profile',
     rkey: 'self'
   });
-  
+
   const profile = response.data.value as any;
   
   // Construct avatar URL if avatar blob exists
