@@ -25,7 +25,10 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
       ? `${profile.displayName} (@${profile.handle}) - ATProto Heatmap`
       : `@${profile.handle} - ATProto Heatmap`;
     const description = profile.description || `View ${profile.handle}'s activity heatmap`;
-    const ogUrl = `/api/og?handle=${encodeURIComponent(profile.handle)}`;
+    
+    // Use the deployed URL from environment variable (Netlify provides this automatically)
+    const baseUrl = process.env.URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const ogUrl = `${baseUrl}/api/og?handle=${encodeURIComponent(profile.handle)}`;
 
     return {
       title,
