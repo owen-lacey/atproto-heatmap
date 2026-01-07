@@ -13,6 +13,7 @@
       "dependencies": [
         "npm:@atproto/api@~0.18.8",
         "npm:@atproto/identity@~0.4.10",
+        "npm:@netlify/functions@^5.1.2",
         "npm:@radix-ui/react-slot@^1.2.4",
         "npm:@supabase/supabase-js@^2.48.0",
         "npm:@tailwindcss/postcss@4",

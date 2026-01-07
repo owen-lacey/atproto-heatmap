@@ -3,107 +3,20 @@
 import { useMemo, useState } from 'react';
 import { COLLECTIONS } from '@/lib/collections';
 import type { DayData } from '@/lib/hooks/useHeatmapData';
+import { generateHeatmapGrid, generateMonthLabels, type GridCell } from '@/lib/heatmap-utils';
 
 interface HeatmapProps {
   data: Map<string, DayData>;
-}
-
-interface GridCell {
-  date: Date;
-  dateKey: string;
-  count: number;
-  dayData: DayData | null;
-  isNullCell?: boolean;
 }
 
 export function Heatmap({ data }: HeatmapProps) {
   const [hoveredCell, setHoveredCell] = useState<{ x: number; y: number; cell: GridCell } | null>(null);
 
   // Generate grid data for the last 365 days (53 weeks)
-  const gridData = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Yesterday is the last day we should show
-    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-
-    // Calculate the start date (364 days ago, so we don't show dates a year ago or more)
-    const startDate = new Date(today.getTime() - 364 * 24 * 60 * 60 * 1000);
-
-    // Find the first Sunday on or before startDate
-    const dayOfWeek = startDate.getDay();
-    const firstSunday = new Date(startDate);
-    firstSunday.setDate(startDate.getDate() - dayOfWeek);
-
-    const grid: GridCell[][] = [];
-    const maxCount = Math.max(...Array.from(data.values()).map((d) => d.total), 1);
-
-    // Generate 53 weeks
-    for (let week = 0; week < 53; week++) {
-      const weekColumn: GridCell[] = [];
-
-      for (let day = 0; day < 7; day++) {
-        const cellDate = new Date(firstSunday);
-        cellDate.setDate(firstSunday.getDate() + week * 7 + day);
-
-        const dateKey = cellDate.toISOString().split('T')[0];
-        
-        // Mark cells as null if they're after yesterday or before startDate
-        const isNullCell = cellDate > yesterday || cellDate < startDate;
-        
-        const dayData = isNullCell ? null : (data.get(dateKey) || null);
-        const count = isNullCell ? 0 : (dayData?.total || 0);
-
-        weekColumn.push({
-          date: cellDate,
-          dateKey,
-          count,
-          dayData: isNullCell ? null : dayData,
-          isNullCell,
-        });
-      }
-
-      grid.push(weekColumn);
-    }
-
-    return { grid, maxCount };
-  }, [data]);
+  const gridData = useMemo(() => generateHeatmapGrid(data), [data]);
 
   // Get month labels with spans for the top of the grid
-  const monthLabels = useMemo(() => {
-    const labels: Array<{ month: string; startWeek: number; span: number }> = [];
-    let lastMonth = -1;
-    let currentLabel: { month: string; startWeek: number; span: number } | null = null;
-
-    gridData.grid.forEach((week, weekIndex) => {
-      if (week.length === 0) return;
-      
-      const firstDay = week[0];
-      const month = firstDay.date.getMonth();
-
-      if (month !== lastMonth) {
-        // Finish previous label
-        if (currentLabel) {
-          labels.push(currentLabel);
-        }
-        
-        // Start new label
-        const monthName = firstDay.date.toLocaleString('default', { month: 'short' });
-        currentLabel = { month: monthName, startWeek: weekIndex, span: 1 };
-        lastMonth = month;
-      } else if (currentLabel) {
-        // Continue current label
-        currentLabel.span++;
-      }
-    });
-
-    // Don't forget the last label
-    if (currentLabel) {
-      labels.push(currentLabel);
-    }
-
-    return labels;
-  }, [gridData.grid]);
+  const monthLabels = useMemo(() => generateMonthLabels(gridData.grid), [gridData.grid]);
 
   // Get collection info helper
   const getCollectionInfo = (collectionName: string) => {
@@ -178,7 +91,7 @@ export function Heatmap({ data }: HeatmapProps) {
                     const opacity = getOpacity(cell.count);
 
                     // Render null cells as invisible placeholders
-                    if (cell.isNullCell) {
+                    if (cell.isNull) {
                       return (
                         <div
                           key={`${weekIndex}-${dayIndex}`}

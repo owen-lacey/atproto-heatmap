@@ -2,6 +2,7 @@ import { ImageResponse } from 'next/og';
 import { getProfile } from '@/lib/atproto';
 import { createServerClient } from '@/lib/supabase';
 import { COLLECTIONS } from '@/lib/collections';
+import { generateHeatmapGrid, HeatmapGridData } from '@/lib/heatmap-utils';
 
 export const runtime = 'nodejs';
 
@@ -81,37 +82,6 @@ async function fetchHeatmapData(handleId: string): Promise<Map<string, DayData>>
   return dataMap;
 }
 
-// Generate heatmap grid data
-function generateGridData(data: Map<string, DayData>) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-  const startDate = new Date(today.getTime() - 364 * 24 * 60 * 60 * 1000);
-
-  const dayOfWeek = startDate.getDay();
-  const firstSunday = new Date(startDate);
-  firstSunday.setDate(startDate.getDate() - dayOfWeek);
-
-  const grid: Array<Array<{ count: number; isNull: boolean }>> = [];
-  const maxCount = Math.max(...Array.from(data.values()).map((d) => d.total), 1);
-
-  for (let week = 0; week < 53; week++) {
-    const weekColumn: Array<{ count: number; isNull: boolean }> = [];
-    for (let day = 0; day < 7; day++) {
-      const cellDate = new Date(firstSunday);
-      cellDate.setDate(firstSunday.getDate() + week * 7 + day);
-      const dateKey = cellDate.toISOString().split('T')[0];
-      const isNull = cellDate > yesterday || cellDate < startDate;
-      const dayData = isNull ? null : data.get(dateKey);
-      const count = isNull ? 0 : (dayData?.total || 0);
-      weekColumn.push({ count, isNull });
-    }
-    grid.push(weekColumn);
-  }
-
-  return { grid, maxCount };
-}
-
 // Get collection stats
 function getCollectionStats(data: Map<string, DayData>): { stats: CollectionStat[]; total: number } {
   const collectionTotals = new Map<string, number>();
@@ -168,12 +138,12 @@ async function generateProfileOG(handle: string) {
 
   let heatmapData = new Map<string, DayData>();
   let collectionStats: { stats: CollectionStat[]; total: number } = { stats: [], total: 0 };
-  let gridData: { grid: Array<Array<{ count: number; isNull: boolean }>>; maxCount: number } = { grid: [], maxCount: 1 };
+  let gridData: HeatmapGridData = { grid: [], maxCount: 1 };
 
   if (handleRecord?.status === 'complete') {
     heatmapData = await fetchHeatmapData(handleRecord.id);
     collectionStats = getCollectionStats(heatmapData);
-    gridData = generateGridData(heatmapData);
+    gridData = generateHeatmapGrid(heatmapData);
   }
 
   const hasData = collectionStats.total > 0;
