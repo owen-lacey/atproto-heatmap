@@ -17,8 +17,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "ATProto Browser",
-    template: "%s | ATProto Browser",
+    default: "ATProto Heatmap",
+    template: "%s | ATProto Heatmap",
   },
   description: "Browse ATProto repositories and generate OG previews",
   icons: {
