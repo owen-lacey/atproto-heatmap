@@ -265,10 +265,10 @@ async function generateProfileOG(handle: string) {
 
           {/* Profile info */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <div style={{ fontSize: 36, fontWeight: 'bold', color: '#fff' }}>
+            <div style={{ display: 'flex', fontSize: 36, fontWeight: 'bold', color: '#fff' }}>
               {profile.displayName || profile.handle}
             </div>
-            <div style={{ fontSize: 20, color: '#888' }}>
+            <div style={{ display: 'flex', fontSize: 20, color: '#888' }}>
               @{profile.handle}
             </div>
           </div>
@@ -276,10 +276,10 @@ async function generateProfileOG(handle: string) {
           {/* Stats */}
           {hasData && (
             <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-              <div style={{ fontSize: 40, fontWeight: 'bold', color: '#10B981' }}>
+              <div style={{ display: 'flex', fontSize: 40, fontWeight: 'bold', color: '#10B981' }}>
                 {collectionStats.total.toLocaleString()}
               </div>
-              <div style={{ fontSize: 16, color: '#888' }}>
+              <div style={{ display: 'flex', fontSize: 16, color: '#888' }}>
                 records this year
               </div>
             </div>
@@ -313,14 +313,15 @@ async function generateProfileOG(handle: string) {
                     height: 12,
                     borderRadius: 6,
                     backgroundColor: stat.color,
+                    flexShrink: 0,
                   }}
                 />
-                <span style={{ fontSize: 14, color: '#ccc' }}>
+                <div style={{ display: 'flex', fontSize: 14, color: '#ccc' }}>
                   {stat.displayName}
-                </span>
-                <span style={{ fontSize: 14, color: '#666' }}>
+                </div>
+                <div style={{ display: 'flex', fontSize: 14, color: '#666' }}>
                   {stat.percentage.toFixed(0)}%
-                </span>
+                </div>
               </div>
             ))}
           </div>
@@ -356,7 +357,7 @@ async function generateProfileOG(handle: string) {
           </div>
         ) : (
           <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ fontSize: 24, color: '#666' }}>
+            <div style={{ display: 'flex', fontSize: 24, color: '#666' }}>
               {handleRecord?.status === 'hydrating' ? 'Loading activity data...' : 'No activity data yet'}
             </div>
           </div>
@@ -364,13 +365,13 @@ async function generateProfileOG(handle: string) {
 
         {/* Footer */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>
-          <div style={{ fontSize: 14, color: '#666' }}>
+          <div style={{ display: 'flex', fontSize: 14, color: '#666' }}>
             ATProto Heatmap
           </div>
           {/* Legend */}
           {hasData && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 12, color: '#666' }}>Less</span>
+              <div style={{ display: 'flex', fontSize: 12, color: '#666' }}>Less</div>
               <div style={{ display: 'flex', gap: 3 }}>
                 {[0, 0.25, 0.5, 0.75, 1].map((opacity, index) => (
                   <div
@@ -384,7 +385,7 @@ async function generateProfileOG(handle: string) {
                   />
                 ))}
               </div>
-              <span style={{ fontSize: 12, color: '#666' }}>More</span>
+              <div style={{ display: 'flex', fontSize: 12, color: '#666' }}>More</div>
             </div>
           )}
         </div>
@@ -448,10 +449,10 @@ function generateDefaultOG() {
             />
           </svg>
         </div>
-        <div style={{ fontSize: 56, fontWeight: 'bold', color: '#fff' }}>
+        <div style={{ display: 'flex', fontSize: 56, fontWeight: 'bold', color: '#fff' }}>
           ATProto Heatmap
         </div>
-        <div style={{ fontSize: 24, color: '#888' }}>
+        <div style={{ display: 'flex', fontSize: 24, color: '#888' }}>
           Visualize your AT Protocol activity
         </div>
       </div>
