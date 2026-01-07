@@ -19,7 +19,7 @@ export function ProfileCardLoading() {
               </div>
               
               {/* Collection Breakdown skeleton */}
-              <div>
+              <div className="mb-1">
                 {/* Progress bar */}
                 <Skeleton className="h-2 w-full rounded-full mb-4" />
                 
@@ -42,7 +42,7 @@ export function ProfileCardLoading() {
 
         {/* Heatmap skeleton - matching Heatmap component */}
         <div className="bg-card rounded-lg border border-border p-6">
-          <Skeleton className="h-6 w-40 mb-4" />
+          <Skeleton className="h-6 w-40 mb-6" />
           
           <div className="relative">
             <div className="overflow-x-auto pb-2 mb-2">
@@ -103,7 +103,7 @@ export default function ProfileLoading() {
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Breadcrumb skeleton */}
-        <nav className="flex items-center gap-2 text-sm">
+        <nav className="flex items-center gap-2 text-sm mt-1">
           <Skeleton className="h-4 w-12" />
           <Skeleton className="h-4 w-4" />
           <Skeleton className="h-4 w-32" />
