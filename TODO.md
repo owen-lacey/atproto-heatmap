@@ -24,7 +24,7 @@
 
 ---
 
-### 5. [ ] Fix profile page flicker
+### 5. [x] Fix profile page flicker
 **Difficulty:** Easy-Medium  
 **Spec:** Profile page shows avatar → loading spinner → avatar+heatmap sequence. Use React Suspense boundaries or loading states to prevent remounting of avatar component during data fetch.
 
@@ -47,10 +47,9 @@
 
 **Spec:** 
 1. Check user's profile for `!no-unauthenticated` label before data collection
-2. If present, show modal: "This user has opted out of public indexing. View anyway?" with Yes/No buttons
-3. If No: redirect to home. If Yes: proceed with standard flow
-4. Use ATProto OAuth for authentication when implementing override feature
-5. Check label via `app.bsky.actor.getProfile` API call
+2. If present, show error: "This user has opted out of public indexing"
+3. Check label via `app.bsky.actor.getProfile` API call
+4. Update the privacy policy to mention this
 
 ---
 
