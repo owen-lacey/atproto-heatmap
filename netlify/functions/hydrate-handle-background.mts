@@ -241,15 +241,40 @@ export default async function (req: Request, context: Context) {
 
     console.log(`Total records fetched: ${allRecords.length}`);
 
+    // Filter out records from today when in delta mode
+    // This ensures we only save complete days and don't miss posts from later in the day
+    let recordsToSave = allRecords;
+    if (deltaMode) {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      const originalCount = allRecords.length;
+      recordsToSave = allRecords.filter((r) => {
+        const recordDate = new Date(r.timestamp);
+        return recordDate < todayStart;
+      });
+
+      console.log(`Delta mode: filtered out ${originalCount - recordsToSave.length} records from today`);
+      console.log(`Records to save: ${recordsToSave.length}`);
+    }
+
     // Insert records in batches
-    if (allRecords.length > 0) {
-      await insertRecordsInBatches(supabase, recordId, allRecords);
+    if (recordsToSave.length > 0) {
+      await insertRecordsInBatches(supabase, recordId, recordsToSave);
     }
 
     // Mark as complete and update timestamp
+    // In delta mode, set updated_at to start of today to ensure we refetch today's posts next time
+    const updateData: { status: string; updated_at?: string } = { status: 'complete' };
+    if (deltaMode) {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      updateData.updated_at = todayStart.toISOString();
+    }
+
     await supabase
       .from('handles')
-      .update({ status: 'complete' })
+      .update(updateData)
       .eq('id', recordId);
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -258,7 +283,8 @@ export default async function (req: Request, context: Context) {
     return new Response(
       JSON.stringify({
         success: true,
-        recordCount: allRecords.length,
+        recordCount: recordsToSave.length,
+        recordsFetched: allRecords.length,
         mode: deltaMode ? 'delta' : 'full',
         duration: `${duration}s`,
       }),
