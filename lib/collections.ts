@@ -47,6 +47,18 @@ export const COLLECTIONS: CollectionConfig[] = [
     displayName: 'Frontpage',
     timestampProperty: 'createdAt',
     color: '#7C85FF'
+  },
+  {
+    collection: 'my.skylights.listItem',
+    displayName: 'Skylights',
+    timestampProperty: 'addedAt',
+    color: '#8B5CF6'
+  },
+  {
+    collection: 'exchange.recipe.recipe',
+    displayName: 'Recipe Exchange',
+    timestampProperty: 'createdAt',
+    color: '#F59E0B'
   }
 ];
 
