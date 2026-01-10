@@ -11,6 +11,18 @@ Currently supports the following AT Protocol collections (see [lib/collections.t
 - WhiteWind blog entries
 - Smoke Signal events
 - Frontpage posts
+- Recipe Exchange recipes
+- Sprk posts
+- PopFeed reviews
+- Tangled repos and strings
+- Plyr tracks
+- Sidetrail trails and completions
+- Nooki posts
+- Grain photos and galleries
+- DropAnchor checkins
+- BeaconBits beacons
+- Kibun status updates
+- Status records
 
 If a new AT Protocol collection is added and you'd like to see it supported, please raise an issue.
 
