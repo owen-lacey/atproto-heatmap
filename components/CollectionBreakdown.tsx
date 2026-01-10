@@ -35,7 +35,7 @@ export function CollectionBreakdown({ data }: CollectionBreakdownProps) {
     const collectionStats: CollectionStat[] = [];
     
     collectionTotals.forEach((count, collection) => {
-      const config = COLLECTIONS.find((c) => c.collection === collection);
+      const config = COLLECTIONS.find((c) => c.collections.includes(collection));
       const displayName = config?.displayName || collection;
       const color = config?.color || '#999999';
       const percentage = grandTotal > 0 ? (count / grandTotal) * 100 : 0;
