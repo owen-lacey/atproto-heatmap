@@ -223,19 +223,21 @@ export default async function (req: Request, context: Context) {
     const allRecords: Array<{ collection: string; timestamp: string }> = [];
 
     for (const collectionConfig of COLLECTIONS) {
-      try {
-        const records = await fetchRecordsForCollection(
-          agent,
-          did,
-          collectionConfig.collection,
-          collectionConfig.timestampProperty,
-          cutoffDate,
-          startDate
-        );
-        allRecords.push(...records);
-      } catch (error) {
-        console.error(`Failed to fetch ${collectionConfig.collection}:`, error);
-        // Continue with other collections
+      for (const collection of collectionConfig.collections) {
+        try {
+          const records = await fetchRecordsForCollection(
+            agent,
+            did,
+            collection,
+            collectionConfig.timestampProperty,
+            cutoffDate,
+            startDate
+          );
+          allRecords.push(...records);
+        } catch (error) {
+          console.error(`Failed to fetch ${collection}:`, error);
+          // Continue with other collections
+        }
       }
     }
 

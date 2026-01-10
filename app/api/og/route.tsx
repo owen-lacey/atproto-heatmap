@@ -96,7 +96,7 @@ function getCollectionStats(data: Map<string, DayData>): { stats: CollectionStat
 
   const collectionStats: CollectionStat[] = [];
   collectionTotals.forEach((count, collection) => {
-    const config = COLLECTIONS.find((c) => c.collection === collection);
+    const config = COLLECTIONS.find((c) => c.collections.includes(collection));
     collectionStats.push({
       collection,
       displayName: config?.displayName || collection,

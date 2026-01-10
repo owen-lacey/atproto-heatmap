@@ -20,7 +20,7 @@ export function Heatmap({ data }: HeatmapProps) {
 
   // Get collection info helper
   const getCollectionInfo = (collectionName: string) => {
-    const config = COLLECTIONS.find((c) => c.collection === collectionName);
+    const config = COLLECTIONS.find((c) => c.collections.includes(collectionName));
     return config || { displayName: collectionName, color: '#999999' };
   };
 

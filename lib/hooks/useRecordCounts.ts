@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createBrowserClient } from '@/lib/supabase';
-import { COLLECTIONS } from '@/lib/collections';
+import { getCollectionNames } from '@/lib/collections';
 import type { Database } from '@/lib/supabase';
 
 type HandleStatus = Database['public']['Tables']['handles']['Row']['status'];
@@ -35,7 +35,7 @@ export function useRecordCounts(
           // Fallback: count records with pagination
           const counts: Record<string, number> = {};
 
-          for (const collection of COLLECTIONS) {
+          for (const coll of getCollectionNames()) {
             let total = 0;
             let from = 0;
             const pageSize = 1000;
@@ -46,11 +46,11 @@ export function useRecordCounts(
                 .from('records')
                 .select('id', { count: 'exact', head: true })
                 .eq('handle_id', recordId)
-                .eq('collection', collection.collection)
+                .eq('collection', coll)
                 .range(from, from + pageSize - 1);
 
               if (error) {
-                console.error(`Error counting ${collection.collection}:`, error);
+                console.error(`Error counting ${coll}:`, error);
                 break;
               }
 
@@ -65,7 +65,7 @@ export function useRecordCounts(
             }
 
             if (total > 0) {
-              counts[collection.collection] = total;
+              counts[coll] = total;
             }
           }
 
