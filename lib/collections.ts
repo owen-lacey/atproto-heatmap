@@ -49,16 +49,94 @@ export const COLLECTIONS: CollectionConfig[] = [
     color: '#7C85FF'
   },
   {
-    collection: 'my.skylights.listItem',
-    displayName: 'Skylights',
-    timestampProperty: 'addedAt',
-    color: '#8B5CF6'
-  },
-  {
     collection: 'exchange.recipe.recipe',
     displayName: 'Recipe Exchange',
     timestampProperty: 'createdAt',
     color: '#F59E0B'
+  },
+  {
+    collection: 'so.sprk.feed.post',
+    displayName: 'Sprk',
+    timestampProperty: 'createdAt',
+    color: '#A855F7'
+  },
+  {
+    collection: 'social.popfeed.feed.review',
+    displayName: 'PopFeed',
+    timestampProperty: 'createdAt',
+    color: '#EAB308'
+  },
+  {
+    collection: 'sh.tangled.repo',
+    displayName: 'Tangled Repo',
+    timestampProperty: 'createdAt',
+    color: '#475569'
+  },
+  {
+    collection: 'sh.tangled.string',
+    displayName: 'Tangled String',
+    timestampProperty: 'createdAt',
+    color: '#475569'
+  },
+  {
+    collection: 'fm.plyr.track',
+    displayName: 'Plyr',
+    timestampProperty: 'createdAt',
+    color: '#EF4444'
+  },
+  {
+    collection: 'app.sidetrail.trail',
+    displayName: 'Sidetrail',
+    timestampProperty: 'createdAt',
+    color: '#22C55E'
+  },
+  {
+    collection: 'app.sidetrail.completion',
+    displayName: 'Sidetrail Completion',
+    timestampProperty: 'createdAt',
+    color: '#22C55E'
+  },
+  {
+    collection: 'community.nooki.posts',
+    displayName: 'Nooki',
+    timestampProperty: 'createdAt',
+    color: '#F97316'
+  },
+  {
+    collection: 'social.grain.photo',
+    displayName: 'Grain Photo',
+    timestampProperty: 'createdAt',
+    color: '#CA8A04'
+  },
+  {
+    collection: 'social.grain.gallery',
+    displayName: 'Grain Gallery',
+    timestampProperty: 'createdAt',
+    color: '#CA8A04'
+  },
+  {
+    collection: 'app.dropanchor.checkin',
+    displayName: 'DropAnchor',
+    timestampProperty: 'createdAt',
+    color: '#06B6D4'
+  },
+  {
+    collection: 'app.beaconbits.beacon',
+    displayName: 'BeaconBits',
+    timestampProperty: 'createdAt',
+    color: '#F59E0B'
+  },
+  {
+    collection: 'social.kibun.status',
+    displayName: 'Kibun',
+    timestampProperty: 'createdAt',
+    color: '#84CC16'
+  },
+  {
+    collection: 'io.zzstoatzz.status.record',
+    displayName: 'zzstoatzz',
+    timestampProperty: 'createdAt',
+    color: '#6366F1'
   }
 ];
 
